@@ -44,7 +44,7 @@ RUN go mod init metis/subfinder \
     && go build -trimpath -ldflags="-s -w" -o /out/subfinder github.com/projectdiscovery/subfinder/v2/cmd/subfinder
 
 # ---------- Etapa 2: imagem final ----------
-FROM python:3.11-slim-bookworm
+FROM python:3.14-slim-bookworm
 
 # Instala o nmap (única ferramenta que vem via apt) e limpa o cache do apt
 # para manter a imagem pequena.
