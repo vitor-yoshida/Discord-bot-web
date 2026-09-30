@@ -1,0 +1,50 @@
+# =========================================================================
+# Dependabot — vigilância automática das dependências fixadas.
+#
+# Por que existe: nós FIXAMOS as versões (requirements.txt e Dockerfile) para
+# ter builds reprodutíveis. O efeito colateral é que versões fixadas envelhecem
+# e podem acumular falhas de segurança (CVEs). O Dependabot resolve isso:
+# ele monitora as dependências e, quando há atualização (especialmente de
+# segurança), abre um Pull Request propondo o novo pin. Você revisa e só
+# aprova se estiver tudo certo — mantendo o controle, sem depender de memória.
+#
+# Documentação: https://docs.github.com/code-security/dependabot
+# =========================================================================
+
+version: 2
+updates:
+  # ---- Dependências Python (requirements.txt) ----
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "deps"          # PRs ficam como "deps: bump aiohttp ..."
+    labels:
+      - "dependencies"
+      - "python"
+
+  # ---- Imagens base do Docker (Dockerfile) ----
+  # Cobre as tags de "python:3.11-slim-bookworm" e "golang:1.22-bookworm".
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "deps(docker)"
+    labels:
+      - "dependencies"
+      - "docker"
+
+  # ---- Actions do GitHub (se/quando houver workflows em .github/workflows) ----
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "deps(ci)"
+    labels:
+      - "dependencies"
+      - "ci"

@@ -1,0 +1,22 @@
+# =========================================================================
+# docker-compose do Metis Bot.
+#
+# - Constrói a imagem a partir do Dockerfile.
+# - Lê as variáveis do arquivo .env (que fica FORA da imagem e do Git).
+# - Reinicia o container automaticamente se ele cair (restart: unless-stopped).
+#
+# Uso:
+#   docker compose up --build -d      # sobe em segundo plano
+#   docker compose logs -f            # acompanha os logs
+#   docker compose down               # para e remove o container
+# =========================================================================
+
+services:
+  metis-bot:
+    build: .
+    container_name: metis-bot
+    # Carrega DISCORD_TOKEN, IPINFO_TOKEN, AUTHORIZED_ROLE_ID e ALLOWED_NETWORKS.
+    env_file:
+      - .env
+    # Reinicia sozinho em caso de queda, mas não se for parado de propósito.
+    restart: unless-stopped

@@ -1,0 +1,26 @@
+# Segredos — nunca entram na imagem
+.env
+
+# Metadados e histórico
+.git/
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Ambientes virtuais locais
+.venv/
+venv/
+env/
+
+# Editores e logs
+.vscode/
+.idea/
+*.log
+
+# Documentação e arquivos de apoio que não precisam na imagem
+README.md
+intructions.md
+.env.example

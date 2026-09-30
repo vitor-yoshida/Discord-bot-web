@@ -1,0 +1,4 @@
+# Força quebra de linha LF (padrão Linux) em todos os arquivos de texto,
+# independente do sistema de quem clonar. O bot roda em container Linux, e
+# scripts com CRLF (padrão Windows) quebram lá dentro.
+* text=auto eol=lf

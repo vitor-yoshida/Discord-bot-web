@@ -1,0 +1,104 @@
+# =========================================================================
+# Pipeline de CI/segurança do Metis Bot (GitHub Actions).
+#
+# Roda automaticamente a cada push na main e a cada Pull Request. A ideia é
+# que nenhuma mudança entre sem passar por três verificações:
+#
+#   1. sanidade   -> o código Python ao menos compila (pega erro de sintaxe).
+#   2. deps       -> pip-audit procura CVEs conhecidos nas dependências Python.
+#   3. container  -> constrói a imagem Docker e o Trivy a escaneia por CVEs,
+#                    segredos vazados e mconfigurações no Dockerfile.
+#
+# Complementa o Dependabot: o Dependabot AVISA sobre versões novas; aqui a gente
+# ESCANEIA o que já existe — inclusive gau/subfinder, que o Dependabot não cobre.
+# =========================================================================
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Permissões mínimas (princípio do menor privilégio): o pipeline só lê o repo.
+permissions:
+  contents: read
+
+jobs:
+  # -----------------------------------------------------------------------
+  # 1) Sanidade do código Python
+  # -----------------------------------------------------------------------
+  sanidade:
+    name: Sanidade (compilação Python)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Instalar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Compilar todos os módulos (detecta erro de sintaxe)
+        run: python -m compileall bot
+
+  # -----------------------------------------------------------------------
+  # 2) Auditoria de dependências Python (CVEs)
+  # -----------------------------------------------------------------------
+  auditoria-deps:
+    name: Auditoria de dependências (pip-audit)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Instalar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instalar o pip-audit
+        run: pip install pip-audit==2.7.3
+
+      # Escaneia exatamente as versões fixadas no requirements.txt.
+      # Se houver CVE conhecido em alguma dependência, o job falha e o PR
+      # fica marcado como reprovado.
+      - name: Rodar pip-audit no requirements.txt
+        run: pip-audit -r requirements.txt --strict
+
+  # -----------------------------------------------------------------------
+  # 3) Build da imagem + varredura com Trivy
+  # -----------------------------------------------------------------------
+  container-scan:
+    name: Build e scan do container (Trivy)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Construir a imagem Docker
+        run: docker build -t metis-bot:ci .
+
+      # 3a) Vulnerabilidades (CVEs) na imagem construída: SO + Python + binários.
+      # ignore-unfixed: só reprova por falhas que JÁ TÊM correção disponível
+      # (evita travar por CVE de imagem base sem patch, que não dá pra resolver).
+      - name: Trivy — CVEs na imagem
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: image
+          image-ref: metis-bot:ci
+          severity: "CRITICAL,HIGH"
+          ignore-unfixed: true
+          exit-code: "1"
+
+      # 3b) Segredos e má configuração no repositório (ex.: um token esquecido,
+      # ou boas práticas do Dockerfile). Segredo vazado reprova o PR.
+      - name: Trivy — segredos e má configuração no repositório
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: "secret,misconfig"
+          severity: "CRITICAL,HIGH"
+          exit-code: "1"

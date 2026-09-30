@@ -1,0 +1,8 @@
+# Dependências do Metis Bot — versões fixadas (testadas e estáveis).
+# Fixar versões evita que uma atualização futura quebre o bot sem aviso.
+
+discord.py==2.7.1      # framework do bot + slash commands
+aiohttp==3.14.3        # cliente HTTP assíncrono (crt.sh, ipinfo.io)
+dnspython==2.8.0       # consultas DNS (/dns)
+python-whois==0.9.6    # consulta WHOIS (/whois)
+python-dotenv==1.2.3   # carrega variáveis do .env ao rodar localmente
