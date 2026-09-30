@@ -197,9 +197,12 @@ O Dependabot cobre:
 - **github-actions** — quando houver workflows em `.github/workflows/`.
 
 **Limitação conhecida:** o Dependabot **não** acompanha o `gau` e o `subfinder`, porque eles
-são instalados via `go install ...@versão` dentro do Dockerfile, não por um gerenciador que ele
-entenda. Para essas ferramentas, acompanhe manualmente os *releases* nos repositórios oficiais
-(links na seção "Rodar sem Docker") e atualize as tags no `Dockerfile` quando sair correção.
+são compilados dentro do Dockerfile, não por um gerenciador que ele entenda. O mesmo vale para
+as dependências Go que o Dockerfile força para versões corrigidas (`golang.org/x/net`,
+`x/text`, `x/crypto`, `logrus`, `fasthttp`). Quando o Trivy do CI apontar um CVE novo num
+desses binários, atualize a versão correspondente nas linhas `go get` do `Dockerfile` (o próprio
+relatório do Trivy mostra a versão que corrige). Para as ferramentas em si, acompanhe os
+*releases* nos repositórios oficiais (links na seção "Rodar sem Docker").
 
 ### Pipeline de CI/segurança (`.github/workflows/ci.yml`)
 
