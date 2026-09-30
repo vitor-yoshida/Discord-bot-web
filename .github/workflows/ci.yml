@@ -84,7 +84,7 @@ jobs:
       # ignore-unfixed: só reprova por falhas que JÁ TÊM correção disponível
       # (evita travar por CVE de imagem base sem patch, que não dá pra resolver).
       - name: Trivy — CVEs na imagem
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: image
           image-ref: metis-bot:ci
@@ -95,7 +95,7 @@ jobs:
       # 3b) Segredos e má configuração no repositório (ex.: um token esquecido,
       # ou boas práticas do Dockerfile). Segredo vazado reprova o PR.
       - name: Trivy — segredos e má configuração no repositório
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: fs
           scan-ref: .
